@@ -1,3 +1,5 @@
 # server_config.py
 
-Generated automatically by setup script.
+FLASK_PORT = 5000
+DEBUG_MODE = True
+

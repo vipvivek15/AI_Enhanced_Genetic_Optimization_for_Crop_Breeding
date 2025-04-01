@@ -1,3 +1,35 @@
 # kubernetes.yaml
 
-Generated automatically by setup script.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crop-ai-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crop-ai
+  template:
+    metadata:
+      labels:
+        app: crop-ai
+    spec:
+      containers:
+      - name: crop-ai-container
+        image: your-dockerhub-username/crop-ai:latest
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crop-ai-service
+spec:
+  selector:
+    app: crop-ai
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: LoadBalancer
+

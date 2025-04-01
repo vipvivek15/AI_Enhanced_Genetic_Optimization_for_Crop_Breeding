@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><title>Crop Yield Predictor</title></head>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+<body>
+    <h2>Enter Crop Traits</h2>
+    <form method="POST">
+        {% for i in range(6) %}
+            Feature {{ i+1 }}: <input type="text" name="f{{i}}"><br>
+        {% endfor %}
+        <input type="submit" value="Predict">
+    </form>
+</body>
+</html>
