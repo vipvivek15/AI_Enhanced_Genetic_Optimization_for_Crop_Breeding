@@ -2,6 +2,9 @@
 
 from flask import Flask, request, jsonify, render_template
 from deployment.server_config import FLASK_PORT, DEBUG_MODE
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import torch
 import numpy as np
