@@ -1,9 +1,73 @@
 <!DOCTYPE html>
-<html>
-<head><title>Prediction Result</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prediction Result</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
 <body>
-    <h2>Predicted Yield:</h2>
-    <p>{{ prediction }}</p>
-    <a href="/">Back</a>
+  <div class="container">
+    <h1>🌱 Prediction Result</h1>
+    <p class="description">Your predicted yield is shown below with confidence interval and animated effect.</p>
+
+    <div class="result-box">
+      <span id="animated-value">0.00</span>
+      <span class="unit">tons/ha</span>
+    </div>
+    <p class="description">📉 Confidence Interval: <strong id="confidence-range"></strong></p>
+
+    <div class="history">
+      <h3>📋 Session History</h3>
+      <ul id="historyList"></ul>
+    </div>
+
+    <a href="/" class="submit-btn">🔁 Predict Again</a>
+  </div>
+
+  <script>
+    const targetValue = parseFloat(localStorage.getItem('latestPrediction')) || 0;
+    const lower = parseFloat(localStorage.getItem('lowerBound')) || 0;
+    const upper = parseFloat(localStorage.getItem('upperBound')) || 0;
+    const animatedValue = document.getElementById('animated-value');
+    const confidenceRange = document.getElementById('confidence-range');
+    const historyList = document.getElementById('historyList');
+
+    let current = 0;
+    const steps = 30;
+    const increment = (targetValue - current) / steps;
+
+    let count = 0;
+    const animate = () => {
+      if (count < steps) {
+        current += increment;
+        animatedValue.textContent = current.toFixed(2);
+        count++;
+        requestAnimationFrame(animate);
+      } else {
+        animatedValue.textContent = targetValue.toFixed(2);
+        confidenceRange.textContent = `${lower.toFixed(2)} - ${upper.toFixed(2)} tons/ha`;
+        updateHistory(targetValue);
+      }
+    };
+
+    function updateHistory(val) {
+      let history = JSON.parse(localStorage.getItem('yieldHistory')) || [];
+      history.push(val.toFixed(2));
+      localStorage.setItem('yieldHistory', JSON.stringify(history));
+      renderHistory(history);
+    }
+
+    function renderHistory(history) {
+      historyList.innerHTML = '';
+      history.slice(-5).reverse().forEach(val => {
+        const li = document.createElement('li');
+        li.textContent = `${val} tons/ha`;
+        historyList.appendChild(li);
+      });
+    }
+
+    animate();
+  </script>
 </body>
 </html>

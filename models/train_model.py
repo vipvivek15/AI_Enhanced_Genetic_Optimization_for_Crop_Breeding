@@ -1,5 +1,3 @@
-# train_model.py
-
 import pandas as pd
 import numpy as np
 import torch
@@ -10,18 +8,15 @@ from sklearn.preprocessing import StandardScaler
 from model import CropYieldMLP
 import argparse
 import os
+import joblib
 
 def load_data(data_path):
     df = pd.read_csv(data_path)
-
-    # Drop non-numeric ID columns if they exist
     df = df.drop(columns=['plant_id', 'location_id'], errors='ignore')
 
-    # Separate features and target
     X = df.drop('trait_yield', axis=1).values
     y = df['trait_yield'].values.reshape(-1, 1)
 
-    # Normalize features
     scaler_X = StandardScaler()
     scaler_y = StandardScaler()
     X_scaled = scaler_X.fit_transform(X)
@@ -81,16 +76,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    X, y, _, _ = load_data(args.data)
+    X, y, scaler_X, scaler_y = load_data(args.data)
     trained_model = train_model(X, y, args.epochs, args.batch_size, args.lr)
 
-    # Save trained model
     os.makedirs(os.path.dirname(args.save_path), exist_ok=True)
     torch.save(trained_model.state_dict(), args.save_path)
+    joblib.dump(scaler_X, 'models/scaler_X.pkl')
     print(f"[INFO] Model saved to {args.save_path}")
-
-# python models/train_model.py \
-#   --data data/cleaned_data.csv \
-#   --epochs 50 \
-#   --batch_size 32 \
-#   --save_path models/trained_model.pth
+    print(f"[INFO] Scaler saved to models/scaler_X.pkl")

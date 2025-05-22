@@ -1,14 +1,218 @@
 <!DOCTYPE html>
-<html>
-<head><title>Crop Yield Predictor</title></head>
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Crop Yield Predictor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js">
+  <style>
+    :root {
+      --bg: #f9fcff;
+      --text: #212121;
+      --highlight: #1565c0;
+      --success: #2e7d32;
+      --error: #d32f2f;
+      --loader: #3498db;
+    }
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #f1f1f1;
+      --highlight: #90caf9;
+      --success: #81c784;
+      --error: #ef5350;
+      --loader: #64b5f6;
+    }
+    body {
+      background-color: var(--bg);
+      font-family: 'Segoe UI', sans-serif;
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      width: 100%;
+    }
+    .container {
+      max-width: 960px;
+      margin: auto;
+      padding: 20px;
+    }
+    .theme-toggle {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .loader {
+      display: none;
+      border: 6px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 6px solid var(--loader);
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .show-loader {
+      display: block;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .submit-btn, .clear-btn {
+      width: auto;
+      display: inline-block;
+    }
+    .info-section {
+      background: rgba(0, 0, 0, 0.05);
+      padding: 16px;
+      border-left: 4px solid var(--highlight);
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
 <body>
-    <h2>Enter Crop Traits</h2>
-    <form method="POST">
-        {% for i in range(6) %}
-            Feature {{ i+1 }}: <input type="text" name="f{{i}}"><br>
-        {% endfor %}
-        <input type="submit" value="Predict">
+  <div class="container">
+    <div class="theme-toggle">
+      <label>🌙 Theme:
+        <select id="theme">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+
+    <h1 style="color: var(--highlight);">🌾 AI Crop Yield Predictor</h1>
+    <p>
+      Enter environmental and genetic traits below to predict your crop yield using a trained <strong>Multi-Layer Perceptron (MLP)</strong> model.
+    </p>
+
+    <div class="info-section">
+      🌐 <strong>Factors and Recommended Ranges:</strong>
+      <ul>
+        <li><strong>Soil Nitrogen (%):</strong> 0–30% — Promotes leafy growth. Excess may hinder flowering.</li>
+        <li><strong>Rainfall (mm):</strong> 5–50 mm — Hydration and nutrient mobility.</li>
+        <li><strong>Temperature (°C):</strong> 18–32°C — Critical for physiological processes.</li>
+        <li><strong>Sunlight Hours:</strong> 6–12 hrs — Key for photosynthesis and growth.</li>
+        <li><strong>Soil pH:</strong> 5.5–7.5 — Affects microbial activity and nutrient absorption.</li>
+        <li><strong>Genetic Score:</strong> 0–10 — Reflects crop variety potential and resilience.</li>
+      </ul>
+    </div>
+
+    <form id="predictForm">
+      <label>Soil Nitrogen (%)</label>
+      <input name="feature1" required>
+      <label>Rainfall (mm)</label>
+      <input name="feature2" required>
+      <label>Average Temperature (°C)</label>
+      <input name="feature3" required>
+      <label>Sunlight Hours</label>
+      <input name="feature4" required>
+      <label>Soil pH</label>
+      <input name="feature5" required>
+      <label>Genetic Trait Score</label>
+      <input name="feature6" required>
+      <button type="submit" class="submit-btn">🔍 Predict Yield</button>
     </form>
+
+    <div class="loader" id="loader"></div>
+    <div class="result" id="result"></div>
+    <canvas id="historyChart"></canvas>
+    <button class="clear-btn" id="clearHistory">🧹 Clear Prediction History</button>
+
+    <div class="gpt-container">
+      <div class="gpt-section">
+        <h3>🤖 Ask GPT About Traits</h3>
+        <div class="gpt-form">
+          <input id="gptQuestion" type="text" placeholder="e.g., Why is pH important?" />
+          <button id="askGPT" type="button">💬 Ask GPT</button>
+          <div id="gptResponse" class="gpt-response-box">No answer yet.</div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    document.getElementById('theme').onchange = function() {
+      document.documentElement.setAttribute('data-theme', this.value);
+    };
+
+    document.getElementById('predictForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const loader = document.getElementById('loader');
+      loader.classList.add('show-loader');
+      const features = Array.from(this.elements)
+        .filter(el => el.name?.startsWith('feature'))
+        .map(el => parseFloat(el.value));
+      const res = await fetch('/api/predict', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ features })
+      });
+      const data = await res.json();
+      loader.classList.remove('show-loader');
+      if (data.predicted_yield !== undefined) {
+        document.getElementById('result').innerHTML = `
+          🌱 Predicted Yield: <strong>${data.predicted_yield.toFixed(2)}</strong> tons/ha<br>
+          📉 Confidence Interval: ${data.lower_bound.toFixed(2)} - ${data.upper_bound.toFixed(2)} tons/ha
+        `;
+        updateChart(data.predicted_yield);
+      } else {
+        document.getElementById('result').textContent = 'Prediction failed.';
+      }
+    };
+
+    function updateChart(value) {
+      let history = JSON.parse(localStorage.getItem('yieldHistory') || '[]');
+      history.push(value);
+      localStorage.setItem('yieldHistory', JSON.stringify(history));
+      renderChart(history);
+    }
+
+    function renderChart(history) {
+      const ctx = document.getElementById('historyChart').getContext('2d');
+      if (window.yieldChart) window.yieldChart.destroy();
+      window.yieldChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: history.map((_, i) => `Run ${i + 1}`),
+          datasets: [{
+            label: 'Yield History (tons/ha)',
+            data: history,
+            fill: true,
+            backgroundColor: 'rgba(21,101,192,0.1)',
+            borderColor: 'rgba(21,101,192,1)',
+            borderWidth: 2,
+            tension: 0.4
+          }]
+        }
+      });
+    }
+
+    document.getElementById('clearHistory').onclick = () => {
+      localStorage.removeItem('yieldHistory');
+      if (window.yieldChart) window.yieldChart.destroy();
+    };
+
+    document.getElementById('askGPT').onclick = async () => {
+      const question = document.getElementById('gptQuestion').value;
+      const res = await fetch('/api/gpt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question })
+      });
+      const data = await res.json();
+      document.getElementById('gptResponse').textContent = data.answer || 'No answer received.';
+    };
+  </script>
 </body>
 </html>

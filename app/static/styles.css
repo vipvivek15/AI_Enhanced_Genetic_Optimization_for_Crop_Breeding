@@ -1,8 +1,146 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    padding: 40px;
-}
-form input {
-    margin: 10px 0;
-}
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  .container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 95%;
+    max-width: 700px;
+    text-align: center;
+  }
+  
+  .description {
+    color: #4a5568;
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+  
+  form label {
+    display: block;
+    margin-top: 12px;
+    text-align: left;
+    font-weight: bold;
+  }
+  
+  input[type='number'] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-top: 4px;
+  }
+  
+  .submit-btn {
+    margin-top: 20px;
+    background-color: #2f855a;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  .submit-btn:hover {
+    background-color: #276749;
+  }
+  
+  .result {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    color: #2b6cb0;
+  }
+  
+  .result-box {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2f855a;
+    margin: 20px 0;
+  }
+  
+  .loader {
+    display: none;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #2b6cb0;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    margin: 20px auto;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .history ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .history li {
+    background: #edf2f7;
+    margin: 5px;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+  }
+  
+  .gpt-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .gpt-section {
+    width: 100%;
+    max-width: 700px; /* Match your input form width */
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    border-left: 4px solid var(--highlight);
+    margin-top: 30px;
+  }
+  
+  .gpt-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .gpt-form input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+  
+  .gpt-form button {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 6px;
+    background-color: var(--highlight);
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .gpt-response-box {
+    background: #f1f1f1;
+    padding: 12px;
+    border-radius: 6px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.5;
+    font-size: 0.95rem;
+  }
