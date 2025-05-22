@@ -105,4 +105,5 @@ def ask_gpt():
 
 if __name__ == "__main__":
     load_model()
-    app.run(debug=DEBUG_MODE, port=FLASK_PORT)
+    host = os.getenv("HOST", "127.0.0.1")
+    app.run(debug=DEBUG_MODE, port=FLASK_PORT, host=host)
