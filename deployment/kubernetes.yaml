@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: crop-ai-container
-        image: your-dockerhub-username/crop-ai:latest
+        image: vipvivek15/crop-ai:latest
         ports:
         - containerPort: 5000
 ---
